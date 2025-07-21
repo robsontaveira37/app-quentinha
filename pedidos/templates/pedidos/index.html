@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peça sua Quentinha</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pedidos/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="{% static 'pedidos/images/comidas_do_chefe_logo.png'%}" alt="logo" class="logo">
+            <h1>Monte sua Quentinha</h1>
+        </header>
+
+        <form action="{% url 'pedidos:index' %}" method="POST" id="pedido-form">
+            {% csrf_token %}
+
+            <section>
+                <h2>1. Escolha o tamanho</h2>
+                {% for tamanho in tamanhos %}
+                <div class="radio-option">
+                    <input type="radio" id="tamanho_{{ tamanho.id }}" name="tamanho_quentinha" value="{{ tamanho.id }}"
+                           data-limite-proteina="{{ tamanho.limite_proteinas }}" data-preco-base="{{ tamanho.preco_base }}" required>
+                    <label for="tamanho_{{ tamanho.id }}">{{ tamanho.nome }} - R$ {{ tamanho.preco_base }}</label>
+                </div>
+                {% endfor %}
+            </section>
+
+            <section>
+                <h2>Monte suas guarnições</h2>
+
+                {% if arroz_opcoes %}
+                <fieldset>
+                    <legend>Arroz (Escolha 1)</legend>
+
+                    {% for item in arroz_opcoes %}
+                    <div class="radio-option">
+                        <input type="radio" name="itens_cardapio_arroz" id="item_{{ item.id }}" value="{{ item.id }}" required>
+                        <label for="item_{{ item.id }}">{{ item.nome }}</label>
+                    </div>
+                    {% endfor %}
+                </fieldset>
+                {% endif %}
+
+                {% if feijao_opcoes %}
+                <fieldset>
+                    <legend>Feijão (Escolha 1)</legend>
+                    {% for item in feijao_opcoes %}
+                    <div class="radio-option">
+                        <input type="radio" name="itens_cardapio_feijao" id="item_{{ item.id }}" value="{{ item.id }}">
+                        <label for="item_{{ item.id }}">{{ item.nome }}</label>
+                    </div>
+                    {% endfor %}
+                    <div class="radio-option">
+                        <input type="radio" name="itens_cardapio_feijao" id="feijao_nenhum" value="">
+                        <label for="feijao_nenhum">Nenhuma opção</label>
+                    </div>
+                </fieldset>
+                {% endif %}
+
+                {% if guarnicoes_opcoes %}
+                <fieldset>
+                    <legend>Outras Guarnições</legend>
+                    {% for item in guarnicoes_opcoes %}
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="item_{{ item.id  }}" name="itens_cardapio"
+                        value="{{ item.id }}">
+                        <label for="item_{{ item.id }}">{{ item.nome }}</label>
+                    </div>
+                    {% endfor%}
+                </fieldset>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>3. Escolha sua(s) proteína(s)</h2>
+                <p>Limite: <span id="limite-proteina-display">Selecione um tamanho</span></p>
+                <fieldset id="proteinas-fieldset" disabled>
+                    <legend>Proteínas</legend>
+                    {% for item in proteinas_opcoes %}
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="item_{{ item.id }}" name="itens_cardapio" value="{{ item.id }}" class="proteina-check">
+                        <label for="item_{{ item.id }}">{{ item.nome }}</label>
+                    </div>
+                    {% endfor %}
+                </fieldset>
+            </section>
+
+            <section>
+                <h2>4. Adicionais</h2>
+                {% for adicional in adicionais_opcoes %}
+                <div class="checkbox-option">
+                    <input type="checkbox" id="adicional_{{ adicional.id }}" name="adicionais" value="{{ adicional.id }}"
+                           class="adicional-check" data-preco-adicional="{{ adicional.preco }}">
+                    <label for="adicional_{{ adicional.id }}">{{ adicional.nome }} (+ R$ {{ adicional.preco }})</label>
+                </div>
+                {% endfor %}
+            </section>
+
+            <section>
+                <h2>5. Seus Dados</h2>
+                <input type="text" name="cliente" placeholder="Seu nome completo" required>
+                <input type="tel" name="telefone" placeholder="Seu Whatsapp ex: 85912345678" required>
+                <input type="text" name="endereco_rua" placeholder="Rua / Avenida" required>
+                <input type="text" name="endereco_numero" placeholder="Número" required>
+                <input type="text" name="endereco_bairro" placeholder="Bairro" required>
+                <input type="text" name="endereco_referencia" placeholder="Ponto de referncia (opcional)">
+            </section>
+
+            <section>
+                <h2>6. Pagamento</h2>
+                <fieldset>
+                    <legend>Qual será a forma de pagamento?</legend>
+                    <div class="radio-option">
+                        <input type="radio" name="metodo_pagamento" id="pagamento_dinheiro" value="DINHEIRO" required>
+                        <label for="pagamento_dinheiro">Dinheiro</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="pagamento_pix" name="metodo_pagamento" value="PIX" checked>
+                        <label for="pagamento_pix">PIX</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="pagamento_credito" name="metodo_pagamento" value="CREDITO">
+                        <label for="pagamento_credito">Cartão de Crédito</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="pagamento_debito" name="metodo_pagamento" value="DEBITO">
+                        <label for="pagamento_debito">Cartão de Débito</label>
+                    </div>
+                </fieldset>
+
+                <div id="campo_troco" style="display: none;">
+                    <label for="valor_troco">Troco para quanto?</label>
+                    <input type="number" id="valor_troco" name="valor_troco_para" step="0.01" min="0" placeholder="Ex: 50.00">
+                </div>
+            </section>
+
+            <div class="total-container">
+                <h3>Total do pedido: R$ <span id="total-pedido">0.00</span></h3>
+                <p>(Taxa de entrega: R$ 3,00)</p>
+                <button type="submit">Finalizar Pedido</button>
+            </div>
+        </form>
+    </div>
+
+
+    <!--Inicio do alert-->
+    <div id="custom-alert-overlay" class="hidden"></div>
+    <div id="custom-alert-box" class="hidden">
+        <p id="custom-alert-message"></p>
+        <button id="custom-alert-close">OK</button>
+    </div>
+
+    <script>
+        // LÓGICA JAVASCRIPT PARA INTERATIVIDADE
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('pedido-form');
+            const radiosTamanho = document.querySelectorAll('input[name="tamanho_quentinha"]');
+            const checksProteina = document.querySelectorAll('.proteina-check');
+            const fieldsetProteinas = document.getElementById('proteinas-fieldset');
+            const limiteDisplay = document.getElementById('limite-proteina-display');
+
+            const radiosPagamento = document.querySelectorAll('input[name="metodo_pagamento"]');
+            const campoTroco = document.getElementById('campo_troco');
+            const inputTroco = document.getElementById('valor_troco');
+
+            const alertOverlay = document.getElementById('custom-alert-overlay');
+            const alertBox = document.getElementById('custom-alert-box');
+            const alertMessage = document.getElementById('custom-alert-message');
+            const alertCloseBtn = document.getElementById('custom-alert-close');
+
+            // 2. Crie uma função para MOSTRAR o alerta
+            function showCustomAlert(message) {
+                alertMessage.textContent = message; // Define a mensagem
+                alertOverlay.classList.remove('hidden'); // Mostra o fundo
+                alertBox.classList.remove('hidden'); // Mostra a caixa
+            }
+
+            // 3. Crie uma função para ESCONDER o alerta
+            function hideCustomAlert() {
+                alertOverlay.classList.add('hidden');
+                alertBox.classList.add('hidden');
+            }
+
+            // 4. Adicione eventos para fechar o alerta
+            alertCloseBtn.addEventListener('click', hideCustomAlert);
+            alertOverlay.addEventListener('click', hideCustomAlert); // Permite fechar clicando fora da caixa
+
+            let limiteProteinas = 0;
+
+            // Habilitar/desabilitar e controlar limite de proteínas
+            radiosTamanho.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    limiteProteinas = parseInt(this.dataset.limiteProteina, 10);
+                    limiteDisplay.textContent = `${limiteProteinas} proteína(s)`;
+                    fieldsetProteinas.disabled = false;
+                    checksProteina.forEach(check => check.checked = false); // Reseta a seleção
+                    calcularTotal();
+                });
+            });
+
+            // Validando a quantidade de proteínas escolhidas
+            checksProteina.forEach(check => {
+                check.addEventListener('change', function() {
+                    const selecionados = document.querySelectorAll('.proteina-check:checked').length;
+                    if (selecionados > limiteProteinas) {
+                        showCustomAlert(`Você só pode escolher até ${limiteProteinas} proteína(s).`);
+                        this.checked = false;
+                    }
+                });
+            });
+
+            // Lógica do campo de troco
+            function verificarMetodoPagamento() {
+                const selecionado = document.querySelector('input[name="metodo_pagamento"]:checked').value;
+                if (selecionado === 'DINHEIRO') {
+                    campoTroco.style.display = 'block';
+                    inputTroco.required = true;
+                } else {
+                    campoTroco.style.display = 'none';
+                    inputTroco.required = false;
+                    inputTroco.value = '';
+                }
+            }
+            radiosPagamento.forEach(radio => radio.addEventListener('change', verificarMetodoPagamento));
+            verificarMetodoPagamento(); // Executa ao carregar a página
+
+            form.addEventListener('submit', function(event) {
+                const metodoPagamento = document.querySelector('input[name="metodo_pagamento"]:checked').value;
+                const valorTroco = parseFloat(inputTroco.value) || 0; // Usa 0 se o campo estiver vazio
+
+                // A validação só roda se o método for DINHEIRO
+                if (metodoPagamento === 'DINHEIRO' && valorTroco !== 0 && valorTroco < valorTotalNumerico) {
+                    // Impede o envio do formulário
+                    event.preventDefault();
+
+                    // Mostra a mensagem de erro
+                    showCustomAlert(`O valor para troco (R$ ${valorTroco.toFixed(2).replace('.',',')}) não pode ser menor que o total da compra (R$ ${valorTotalNumerico.toFixed(2).replace('.',',')}).`);
+                }
+            });
+
+            // Lógica para calcular o preço total dinamicamente
+            const totalDisplay = document.getElementById('total-pedido');
+            function calcularTotal() {
+                let total = 0;
+                const tamanhoSelecionado = document.querySelector('input[name="tamanho_quentinha"]:checked');
+                if (tamanhoSelecionado) {
+                    total += parseFloat(tamanhoSelecionado.dataset.precoBase);
+                }
+
+                const adicionaisSelecionados = document.querySelectorAll('.adicional-check:checked');
+                adicionaisSelecionados.forEach(adicional => {
+                    total += parseFloat(adicional.dataset.precoAdicional);
+                });
+
+                valorTotalNumerico = total;
+
+                totalDisplay.textContent = total.toFixed(2).replace('.', ',');
+            }
+
+            form.addEventListener('change', calcularTotal);
+        });
+
+    </script>
+</body>
+</html>

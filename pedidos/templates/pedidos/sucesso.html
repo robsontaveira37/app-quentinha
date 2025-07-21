@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Recebido!</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pedidos/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Obrigado!</h1>
+        </header>
+        <section class="success-message">
+            <h2>Seu pedido foi recebido com sucesso!</h2>
+            <p>Em breve ele sairá para entrega.</p>
+            <a href="{% url 'pedidos:index' %}" class="button-link">NOVO PEDIDO</a>
+        </section>
+    </div>
+</body>
+</html>

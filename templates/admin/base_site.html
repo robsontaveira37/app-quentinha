@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+    {{ block.super }} {# Mantém o conteúdo original do bloco #}
+
+    <script>
+        // Este script só será executado se estivermos na página de lista de pedidos
+        if (window.location.pathname.includes('/pedidos/pedido/')) {
+
+            // Define o intervalo de tempo em milissegundos (ex: 30000 = 30 segundos)
+            const refreshInterval = 90000;
+
+            setTimeout(function() {
+                location.reload();
+            }, refreshInterval);
+
+            console.log(`Admin: A página de pedidos será atualizada em ${refreshInterval / 1000} segundos.`);
+        } n
+    </script>
+{% endblock %}
